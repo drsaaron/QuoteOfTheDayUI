@@ -1,0 +1,198 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!-- was: <?xml version="1.0" encoding="UTF-8"?> -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-3.0.xsd
+       http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd
+">
+
+    <!--bean id="propertyConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+          p:location="/WEB-INF/jdbc.properties" />
+
+<bean id="dataSource"
+    class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+    p:driverClassName="${jdbc.driverClassName}"
+    p:url="${jdbc.url}"
+    p:username="${jdbc.username}"
+    p:password="${jdbc.password}" /-->
+
+    <!-- ADD PERSISTENCE SUPPORT HERE (jpa, hibernate, etc) -->
+
+    <import resource="componentDefinitions.xml" />
+    
+    <!-- quartz job definitions.    -->
+    <bean id="dailyQuoteOfTheDayJobRunnerDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="dailyQuoteOfTheDayJobRunner" />
+        <property name="targetMethod" value="runDistributionJob" />
+    </bean>
+    
+    <!-- Run the job every day at 6:15 AM -->
+    <bean id="dailyDistributionTrigger"  class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="dailyQuoteOfTheDayJobRunnerDetail" />
+        <property name="cronExpression" value="${qotd.job.cronExpression}" />
+    </bean>
+    
+    <!-- job scheduler -->
+    <bean  class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="jobDetails">
+            <list>
+                <ref bean="dailyQuoteOfTheDayJobRunnerDetail" />
+            </list>
+        </property>
+ 
+        <property name="triggers">
+            <list>
+                <ref bean="dailyDistributionTrigger" />
+            </list>
+        </property>
+    </bean>
+    
+    <!-- work manager -->
+    <bean id="workManager" class="org.springframework.jndi.JndiObjectFactoryBean" scope="singleton">
+        <property name="resourceRef">
+            <value>true</value>
+        </property>
+        <property name="jndiName">
+            <value>wm/default</value>
+        </property>
+    </bean>
+    <bean id="workManagerExecutor" class="org.springframework.scheduling.commonj.WorkManagerTaskExecutor">
+        <property name="workManager" ref="workManager" />
+    </bean> 
+    
+    <!-- task executor -->
+    <alias name="workManagerExecutor" alias="taskExecutor" />
+    
+    <!-- job repository data source -->
+    <bean id="JobRepositoryDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="resourceRef">
+            <value>true</value>
+        </property>
+        <property name="jndiName">
+            <value>jdbc/JobRepository</value>
+        </property>
+    </bean>
+    
+    <bean id="MailParameters" class="com.blazartech.products.qotdp.job.tasklet.MailParameters" scope="singleton">
+        <property name="recipients">
+            <list>
+                <value>dr_saaron@yahoo.com</value>
+            </list>
+        </property>
+    </bean>
+    
+    <!-- define the message mailer -->
+    <bean id="QuoteOfTheDayMailSession" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="resourceRef">
+            <value>false</value>
+        </property>
+        <property name="jndiName">
+            <value>java:comp/env/mail/mailSession</value>
+        </property>
+    </bean>
+    <bean id="MessageMailerImpl" class="com.blazartech.products.mail.process.impl.MessageMailerImpl" scope="singleton">
+        <property name="mailSession" ref="QuoteOfTheDayMailSession" />
+        <property name="replyTo" value="dr_saaron@yahoo.com" />
+    </bean>
+    <alias name="MessageMailerImpl" alias="MessageMailer" />
+    
+    <!-- facebook client -->
+    <bean id="RestFBFacebookClient" class="com.restfb.DefaultFacebookClient" scope="singleton">
+        <constructor-arg index="0" value="CAABwH9J9iVkBAK7WYtMXdC3F1mSUZBtkgZCTZCBGSP1lZBUV6tf5DOZCqf2lTQJYbr0oSzT1uDgfPVVduDw6nvLBAZCvlSlGehnPTT9bZAZC0lae1ZB2Sz2DuMSFe0baitCNCvuf0jlWiFnB2ZCFcc61S2mkVm9BB06Of5Hy23v0xfVekwYHKzWqZCqWi6xLPsmZCZBwZD" /> <!-- **Access token for me instead of the app** value="CAABwH9J9iVkBADxGNZCgDijxhvVdAv2nGLHgHt4CNdCcFALlBS8EAnLh6wZB4sIpNGY8wxH5mg7cspvaJNrcmoTqnhhQPNsnIa9CxTWlyAwAPBcRxaM6sghbIgSPnNskyCp0F3ZBZBeHXZAikxx3BpgZBUKceThofU3iPqfQZBPaekwMSvq5qTUt1ME4dnvMB1IBcZApd58JW2HfjGzb9v2L" --> 
+    </bean>                               
+    <bean id="BTFacebookClientImpl" class="com.blazartech.products.fbclient.impl.FacebookClientRestFBImpl" scope="singleton">
+        <constructor-arg index="0" ref="RestFBFacebookClient" />
+    </bean>
+    <alias alias="BTFacebookClient" name="BTFacebookClientImpl" />
+
+    <!-- facebook poster -->
+    <bean id="postQuoteOfTheDayFacebookPAB" class="com.blazartech.products.qotdp.process.impl.facebook.PostQuoteOfTheDayFacebookPABImpl" scope="singleton">
+        <property name="facebookClient" ref="BTFacebookClient" />
+        <property name="formatPAB" ref="facebookQuoteFormatter" />
+    </bean>
+    <alias alias="facebookPoster" name="postQuoteOfTheDayFacebookPAB" />
+    
+    <!--
+     <jdbc:initialize-database data-source="JobRepositoryDataSource">
+       <jdbc:script
+          location="classpath:/org/springframework/batch/core/schema-drop-mysql.sql" />
+       <jdbc:script
+          location="classpath:/org/springframework/batch/core/schema-mysql.sql" />
+    </jdbc:initialize-database> -->
+    
+    <!-- batch configuration -->
+    <!-- I really hate this bean name for being too generic, but if I change it I get some unexplained
+    errors because something is looking for a bean of that name. -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="JobRepositoryDataSource" />
+    </bean>    
+    <batch:job-repository data-source="JobRepositoryDataSource" transaction-manager="transactionManager" serializer="batchDefaultSerializer" /> 
+    
+    <bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <property name="jobRepository" ref="jobRepository" />
+    </bean>
+    
+    <bean id="batchDefaultSerializer" class="org.springframework.batch.core.repository.dao.DefaultExecutionContextSerializer" />
+    
+    <bean id="jobExplorer" class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean" p:dataSource-ref="JobRepositoryDataSource" p:tablePrefix="BATCH_" p:serializer-ref="batchDefaultSerializer" />
+    
+    <!-- daily quote distribution job -->
+    <batch:step id="getQuoteOfTheDayStep">
+        <batch:tasklet ref="createQuoteOfTheDayTasklet" />
+    </batch:step>
+    <batch:step id="mailQuoteOfTheDayStep">
+        <batch:tasklet ref="mailQuoteOfTheDayTasklet" />
+    </batch:step>
+    <batch:step id="postQuoteOfTheDayFacebookStep">
+        <batch:tasklet ref="postQuoteOfTheDayFacebookTasklet" />
+    </batch:step>
+    
+    <batch:job id="dailyQuoteOfTheDayDistributionJob" restartable="true">
+        
+        <!-- get the quote of the data in the database -->
+        <batch:step id="dailyQuoteOfTheDayDistributionJob_getQuoteStep" parent="getQuoteOfTheDayStep" next="dailyQuoteOfTheDayDistributionJob_distributionSplit" />
+        
+        <!-- parallel processing for the various distributions -->
+        <batch:split id="dailyQuoteOfTheDayDistributionJob_distributionSplit" next="" task-executor="taskExecutor">
+            <!-- mail -->
+            <batch:flow>                
+                <batch:step id="dailyQuoteOfTheDayDistributionJob_distributionSplit_mailStep" parent="mailQuoteOfTheDayStep" />
+            </batch:flow>
+                
+            <!-- post to facebook -->
+            <batch:flow>
+                <batch:step id="dailyQuoteOfTheDayDistributionJob_distributionSplit_facebookStep" parent="postQuoteOfTheDayFacebookStep" />
+            </batch:flow>
+        </batch:split>
+    </batch:job>
+    
+    <!-- parameters builders -->
+    <bean id="DailyQuoteOfTheDayDistributionJobParametersBuilder" class="com.blazartech.products.qotdp.job.DailyQuoteOfTheDayDistributionJobParametersBuilder" />
+    
+    <!-- job manager -->
+    <bean id="incrementer" class="org.springframework.batch.core.launch.support.RunIdIncrementer" />
+    <bean id="SpringJobManager" class="com.nm.ffba.common.batch.impl.spring.SpringBatchJobManager" scope="singleton">
+        <property name="jobs">
+            <map>
+                <entry key="dailyQuoteOfTheDayDistributionJob" value-ref="dailyQuoteOfTheDayDistributionJob" />
+            </map>
+        </property>
+        <property name="parameterBuilders">
+            <map>
+                <entry key="dailyQuoteOfTheDayDistributionJob" value-ref="DailyQuoteOfTheDayDistributionJobParametersBuilder" />
+            </map>
+        </property>
+    </bean>
+
+    <alias name="SpringJobManager" alias="jobManager" />
+</beans>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Quote of the Day</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="stylesheet" type="text/css" media="all" href='QuoteOfTheDay.css'>
+        <link rel="stylesheet" type="text/css" media="all" href='jquery/jquery-ui.css'>
+        <link rel="stylesheet" type="text/css" media="all" href='jquery/jquery-ui.structure.css'>
+        <link rel="stylesheet" type="text/css" media="all" href='jquery/jquery-ui.theme.css'>
+    </head>
+    <body>
+
+        <div id="pageHeader" align="top">
+            <table border='0'>
+                <tr><td align="left">Scott's Quote of the Day
+            </table>
+            <p>
+        </div>
+
+        <div id="pageBody">
+
+            <div id="quoteSourceCodeList" > <ul></ul> </div>
+            <div id="quotesForSourceCode" > 
+                <div id="quotesForSourceCodeName"></div>
+                <div id="quotesForSourceCodeQuotes"> </div>
+            </div>
+
+            <div id="quoteDetailDialog" title="Quote Details">
+
+            </div>
+            
+            <div id="addQuoteDialog" title="Add Quote"> </div>
+            <div id="editQuoteDialog" title="Edit Quote"> </div>
+
+            <script id="quoteDetailsTemplate" type="text/template">
+                <div id="quoteDetailNumber">Quote #<%= number %></div>
+                <p>
+                <div id="quoteDetailText"><%= text.replace(new RegExp('\r?\n', 'g'), '<br />') %></div>
+                <p>
+                <div id="quoteDetailUsable">Usable: <%= usable %></div>
+                <p>
+                <div id="quoteDetailSourceCode"> </div>
+                <p>
+                <div id="quoteDetailPreviousUsage"></div>
+            </script>
+            
+            <script id="addQuoteTemplate" type="text/template">
+                <form id="addQuoteForm" action="#">
+                  <input id="sourceCode" value="<%= number %>" type="hidden" class="sourceCode" />
+                  <table>
+                    <tr><td>Source: </td><td><%= text %></td></tr>
+                    <tr><td>Text:</td><td><textarea id="text"  cols="65" rows="15" value="" class="text" /></td></tr>
+                    <tr><td>Usable:</td><td><input type="checkbox" id="usable" checked="true" class="usable" /></td></tr>
+                    <tr><td colspan="2"><button class="submit">Save</button></td></tr>
+                  </table>
+                </form>
+            </script>
+            
+            <script id="editQuoteTemplate" type="text/template">
+                <form id="editQuoteForm" action="#">
+                  <input id="sourceCode" value="<%= sourceCode %>" type="hidden" class="sourceCode" />
+                  <table>
+                    <tr><td>Text:</td><td><textarea id="text"  cols="65" rows="15" class="text"><%= text %></textarea></td></tr>
+                    <tr><td>Usable:</td><td><input type="checkbox" id="usable" <% if (usable) {%>checked="checked" <% } %> class="usable" /></td></tr>
+                    <tr><td colspan="2"><button class="submit">Save</button></td></tr>
+                  </table>
+                </form>
+            </script>
+
+            <script id="quoteSourceCodeTemplate" type="text/template">
+                <a href="#" id="quotesForSourceCodeLink"><%= text %></a> <button title="Add quote" class="addQuoteButton">+</button>
+            </script>
+
+            <script id="quoteTemplate" type="text/template">
+                <a href="#" id="showQuoteDetail"><%= number %></a> <button id="editQuoteButton">Edit</button>
+                <br><%= text.replace(new RegExp('\r?\n', 'g'), '<br />') %>
+            </script>
+
+            <script src="jquery/jquery-2.1.3.js" type="text/javascript"></script>
+            <script src="jquery/jquery-ui.js" type="text/javascript"></script>
+            <script src="scripts/underscore-min.js" type="text/javascript"></script>
+            <script src="scripts/backbone.js" type="text/javascript"></script>
+            <script src="scripts/app.js" type="text/javascript"></script>
+
+        </div>
+
+        <!-- footer -->
+        <div id="pageFooter">
+            <p>
+            <div id="ApplicationCreditSection">
+                <hr>
+                <a href="/QuoteOfTheDayPlus2/">Quote of the Day</a><br>
+                by Dr. Scott E. Aaron<br>
+                copyright &copy;2006-2015<br>
+                All rights reserved.
+            </div>
+
+        </div>
+    </body>
+</html>

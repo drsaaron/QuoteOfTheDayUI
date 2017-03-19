@@ -1,0 +1,47 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Dec 28, 2015, 12:31:25 PM
+    Author     : scott
+*/
+
+
+root { 
+    display: block;
+}
+
+body { font-family: Helvetica; font-size: 90% }
+
+#pageBody { position: relative; height: 80%; width: 100%; overflow: auto }
+
+#pageFooter { width: 100% ; height: 10%;  }
+
+#ApplicationCreditSection { font-family: Tahoma; font-size: 85%; color: gainsboro;  }
+#ApplicationCreditSection hr { }
+#ApplicationCreditSection a:visited { color: gainsboro; }
+
+.QuoteText { font-family: Times New Roman; }
+.QuoteSource { font-family: Times New Roman; font-size: 90% }
+
+#pageHeader { float: top; font-size: 125%; color: red; font-family: Tahoma; background-color: blue; }
+#pageHeader td { color: red; font-size: 125%; padding: 5px 15px 5px 5px }
+
+.overflow {
+    height: 200px;
+}
+
+.dateEntry { }
+
+#quoteSourceCodeList { width: 50%; height: 80%; float: left; overflow: auto }
+#quotesForSourceCode { width: 50%; height: 80%; float: left; overflow: auto }
+
+.quoteSourceListText {}
+
+.quoteSourceCodeText { font-style: italic }
+#quotesForSourceCodeName { font-weight: bold; font-size: 120% }
+
+.addQuoteButton {}
+.submit {}

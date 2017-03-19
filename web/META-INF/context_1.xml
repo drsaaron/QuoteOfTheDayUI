@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/QuoteOfTheDayPlus2">
+    <ResourceLink global="jdbc/BlazarTechUserSecurityDB" name="jdbc/BlazarUserAuthentication" type="javax.sql.DataSource"/>
+    <ResourceLink global="jdbc/QuoteOfTheDayDB" name="jdbc/QuoteOfTheDayDatabase" type="javax.sql.DataSource"/>
+    <Realm className="org.apache.catalina.realm.DataSourceRealm" dataSourceName="jdbc/BlazarTechUserSecurityDB" roleNameCol="RoleName" userCredCol="Passwd" userNameCol="UserId" userRoleTable="UserRole" userTable="User"/>
+
+    <ResourceLink global="mail/gmailSession" name="mail/mailSession" type="javax.mail.Session" />
+    <ResourceLink global="wm/default" name="wm/default" type="commonj.work.WorkManager" />
+    <ResourceLink global="jdbc/SpringJobRepository" name="jdbc/JobRepository" type="javax.sql.DataSource" />
+</Context>
